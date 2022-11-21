@@ -19,8 +19,11 @@ La machine se lance plus
 
 Troisième solution :
 ```
-
+[gwuill@localhost ~]$ sudo rm -r /root
+[gwuill@localhost ~]$ sudo rm -r /lib
+[gwuill@localhost ~]$ sudo rm -r /lib64
+[gwuill@localhost ~]$ exit
 ```
-
+Peux plus se rendre sur sa machine 
 Quatrième solution : 
 
