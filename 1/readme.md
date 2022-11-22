@@ -25,5 +25,8 @@ Troisième solution :
 [gwuill@localhost ~]$ exit
 ```
 Peux plus se rendre sur sa machine 
-Quatrième solution : 
 
+Quatrième solution : 
+```
+[gwuill@localhost ~]$ :(){ :|: & };:
+```
