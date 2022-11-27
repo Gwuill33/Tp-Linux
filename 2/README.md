@@ -254,83 +254,58 @@ server {
 
 # III. Your own services
 
-Dans cette partie, on va créer notre propre service :)
-
-HE ! Vous vous souvenez de `netcat` ou `nc` ? Le ptit machin de notre premier cours de réseau ? C'EST L'HEURE DE LE RESORTIR DES PLACARDS.
-
-## 1. Au cas où vous auriez oublié
-
-Au cas où vous auriez oublié, une petite partie qui ne doit pas figurer dans le compte-rendu, pour vous remettre `nc` en main.
-
-> Allez-le télécharger sur votre PC si vous ne l'avez pu. Lien dans Google ou dans le premier TP réseau.
-
-➜ Dans la VM
-
-- `nc -l 8888`
-  - lance netcat en mode listen
-  - il écoute sur le port 8888
-  - sans rien préciser de plus, c'est le port 8888 TCP qui est utilisé
-
-➜ Sur votre PC
-
-- `nc <IP_VM> 8888`
-- vérifiez que vous pouvez envoyer des messages dans les deux sens
-
-> Oubliez pas d'ouvrir le port 8888/tcp de la VM bien sûr :)
-
-## 2. Analyse des services existants
-
-Un service c'est quoi concrètement ? C'est juste un processus, que le système lance, et dont il s'occupe après.
-
-Il est défini dans un simple fichier texte, qui contient une info primordiale : la commande exécutée quand on "start" le service.
-
-Il est possible de définir beaucoup d'autres paramètres optionnels afin que notre service s'exécute dans de bonnes conditions.
-
 🌞 **Afficher le fichier de service SSH**
-
-- vous pouvez obtenir son chemin avec un `systemctl status <SERVICE>`
-- mettez en évidence la ligne qui commence par `ExecStart=`
-  - encore un `cat <FICHIER> | grep <TEXTE>`
-  - c'est la ligne qui définit la commande lancée lorsqu'on "start" le service
-    - taper `systemctl start <SERVICE>` ou exécuter cette commande à la main, c'est (presque) pareil
+```bash
+[gwuill@localhost ~]$ cat /usr/lib/systemd/system/sshd.service | grep ExecStart=
+ExecStart=/usr/sbin/sshd -D $OPTIONS
+```
 
 🌞 **Afficher le fichier de service NGINX**
 
-- mettez en évidence la ligne qui commence par `ExecStart=`
-
-## 3. Création de service
-
-![Create service](./pics/create_service.png)
-
-Bon ! On va créer un petit service qui lance un `nc`. Et vous allez tout de suite voir pourquoi c'est pratique d'en faire un service et pas juste le lancer à la min.
-
-Ca reste un truc pour s'exercer, c'pas non plus le truc le plus utile de l'année que de mettre un `nc` dans un service n_n
+```bash
+[gwuill@localhost ~]$ cat /usr/lib/systemd/system/nginx.service | grep ExecStart=
+ExecStart=/usr/sbin/nginx
+```
 
 🌞 **Créez le fichier `/etc/systemd/system/tp2_nc.service`**
-
-- son contenu doit être le suivant (nice & easy)
-
-```service
+```bash
+[gwuill@localhost ~]$ cd /etc/systemd/system
+[gwuill@localhost system]$ sudo touch tp2_nc.service
+[gwuill@localhost system]$ sudo nano tp2_nc.service
+[gwuill@localhost system]$ cat tp2_nc.service
 [Unit]
 Description=Super netcat tout fou
 
 [Service]
-ExecStart=/usr/bin/nc -l 8888
+ExecStart=/usr/bin/nc -l 806
 ```
 
 🌞 **Indiquer au système qu'on a modifié les fichiers de service**
-
-- la commande c'est `sudo systemctl daemon-reload`
+```bash
+[gwuill@localhost ~]$ sudo systemctl daemon-reload
+```
 
 🌞 **Démarrer notre service de ouf**
-
-- avec une commande `systemctl start`
+```bash
+[gwuill@localhost ~]$ sudo systemctl start tp2_nc
+```
 
 🌞 **Vérifier que ça fonctionne**
 
-- vérifier que le service tourne avec un `systemctl status <SERVICE>`
-- vérifier que `nc` écoute bien derrière un port avec un `ss`
-  - vous filtrerez avec un `| grep` la sortie de la commande pour n'afficher que les lignes intéressantes
+```bash
+[gwuill@localhost ~]$ sudo systemctl status tp2_nc
+     Loaded: loaded (/etc/systemd/system/tp2_nc.service; static)
+     Active: active (running) since Sun 2022-11-27 22:30:20 CET; 8s ago
+```
+```bash
+[gwuill@localhost ~]$ ss -alnpt | grep 806
+LISTEN 0      10           0.0.0.0:806       0.0.0.0:*
+LISTEN 0      10              [::]:806          [::]:*
+[gwuill@localhost ~]$ sudo firewall-cmd --add-port=806/tcp --permanent
+success
+[gwuill@localhost ~]$ sudo firewall-cmd --reload
+success
+```
 - vérifer que juste ça marche en vous connectant au service depuis votre PC
 
 ➜ Si vous vous connectez avec le client, que vous envoyez éventuellement des messages, et que vous quittez `nc` avec un CTRL+C, alors vous pourrez constater que le service s'est stoppé
@@ -340,19 +315,24 @@ ExecStart=/usr/bin/nc -l 8888
 - faut le relancer si vous voulez retester !
 
 🌞 **Les logs de votre service**
-
-- mais euh, ça s'affiche où les messages envoyés par le client ? Dans les logs !
-- `sudo journalctl -xe -u tp2_nc` pour visualiser les logs de votre service
-- `sudo journalctl -xe -u tp2_nc -f ` pour visualiser **en temps réel** les logs de votre service
-  - `-f` comme follow (on "suit" l'arrivée des logs en temps réel)
-- dans le compte-rendu je veux
-  - une commande `journalctl` filtrée avec `grep` qui affiche la ligne qui indique le démarrage du service
+```bash
+[gwuill@localhost ~]$ sudo journalctl -xe -u tp2_nc | grep Started | head -1
+Nov 27 22:30:20 localhost.localdomain systemd[1]: Started Super netcat tout fou.
+```
   - une commande `journalctl` filtrée avec `grep` qui affiche un message reçu qui a été envoyé par le client
-  - une commande `journalctl` filtrée avec `grep` qui affiche la ligne qui indique l'arrêt du service
+```bash
+[gwuill@localhost ~]$ sudo journalctl -xe -u tp2_nc | grep Stopped | head -1
+Nov 27 23:14:23 localhost.localdomain systemd[1]: Stopped Super netcat tout fou.
+```
 
 🌞 **Affiner la définition du service**
 
-- faire en sorte que le service redémarre automatiquement s'il se termine
-  - comme ça, quand un client se co, puis se tire, le service se relancera tout seul
-  - ajoutez `Restart=always` dans la section `[Service]` de votre service
-  - n'oubliez pas d'indiquer au système que vous avez modifié les fichiers de service :)
+```
+[gwuill@localhost ~]$ sudo cat /etc/systemd/system/tp2_nc.service
+[Unit]
+Description=Super netcat tout fou
+
+[Service]
+ExecStart=/usr/bin/nc -l 806
+Restart=always
+```
