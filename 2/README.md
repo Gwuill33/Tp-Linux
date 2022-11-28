@@ -250,8 +250,10 @@ server {
 
 🌞 **Visitez votre super site web**
 
-- toujours avec une commande `curl` depuis votre PC (ou un navigateur)
-
+```bash
+$ curl 192.168.56.4:8648
+<h1>MEOW mon premier serveur web</h1>
+```
 # III. Your own services
 
 🌞 **Afficher le fichier de service SSH**
