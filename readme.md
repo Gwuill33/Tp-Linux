@@ -17,3 +17,10 @@ Listening ports :
  - 22 tcp : sshd
 Here is your random cat : cat_pic.jpeg
 ```
+
+**Partie II**
+```bash
+[gwuill@tp3-linux ~]$ bash /srv/yt/yt.sh https://www.youtube.com/watch?v=jjs27jXL0Zs
+Video https://www.youtube.com/watch?v=jjs27jXL0Zs was downloaded.
+File path /srv/yt/downloads/SI LA VIDÉO DURE 1 SECONDE LA VIDÉO S'ARRÊTE/SI LA VIDÉO DURE 1 SECONDE LA VIDÉO S'ARRÊTE.mp4
+```
