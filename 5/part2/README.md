@@ -1,35 +1,35 @@
 # Partie 2 : Mise en place et maîtrise du serveur de base de données
 
-Petite section de mise en place du serveur de base de données sur `db.tp5.linux`. On ira pas aussi loin qu'Apache pour lui, simplement l'installer, faire une configuration élémentaire avec une commande guidée (`mysql_secure_installation`), et l'analyser un peu.
-
-🖥️ **VM db.tp5.linux**
-
-**N'oubliez pas de dérouler la [📝**checklist**📝](#checklist).**
-
-| Machines        | IP            | Service                 |
-|-----------------|---------------|-------------------------|
-| `web.tp5.linux` | `10.105.1.11` | Serveur Web             |
-| `db.tp5.linux`  | `10.105.1.12` | Serveur Base de Données |
-
 🌞 **Install de MariaDB sur `db.tp5.linux`**
 
-- déroulez [la doc d'install de Rocky](https://docs.rockylinux.org/guides/database/database_mariadb-server/)
-- je veux dans le rendu **toutes** les commandes réalisées
-- faites en sorte que le service de base de données démarre quand la machine s'allume
-  - pareil que pour le serveur web, c'est une commande `systemctl` fiez-vous au mémo
+```bash
+[gwuill@db ~]$ sudo dnf install mariadb-server
+[gwuill@db ~]$ sudo systemctl enable mariadb
+Created symlink /etc/systemd/system/mysql.service → /usr/lib/systemd/system/mariadb.service.
+Created symlink /etc/systemd/system/mysqld.service → /usr/lib/systemd/system/mariadb.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/mariadb.service → /usr/lib/systemd/system/mariadb.service.
+[gwuill@db ~]$ sudo systemctl start mariadb
+[gwuill@db ~]$ sudo mysql_secure_installation
+```
 
 🌞 **Port utilisé par MariaDB**
 
-- vous repérerez le port utilisé par MariaDB avec une commande `ss` exécutée sur `db.tp5.linux`
-  - filtrez les infos importantes avec un `| grep`
-- il sera nécessaire de l'ouvrir dans le firewall
-
-> La doc vous fait exécuter la commande `mysql_secure_installation` c'est un bon réflexe pour renforcer la base qui a une configuration un peu *chillax* à l'install.
+```bash
+[gwuill@db ~]$ ss -alntp | grep 3306
+LISTEN 0      80                 *:3306            *:*
+```
+```bash
+[gwuill@db ~]$ sudo firewall-cmd --add-port=3306/tcp --permanent
+success
+[gwuill@db ~]$ sudo firewall-cmd --reload
+success
+```
 
 🌞 **Processus liés à MariaDB**
 
-- repérez les processus lancés lorsque vous lancez le service MariaDB
-- utilisz une commande `ps`
-  - filtrez les infos importantes avec un `| grep`
+```bash
+[gwuill@db ~]$ ps -ef | grep maria | head -1
+mysql       3514       1  0 16:51 ?        00:00:00 /usr/libexec/mariadbd --basedir=/usr
+```
 
 ➜ **Une fois la db en place, go sur [la partie ".](../part3/README.md)**
