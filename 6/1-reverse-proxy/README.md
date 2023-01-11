@@ -107,14 +107,11 @@ $ curl -s 10.105.1.13:80 | head -5
 ➜ **Faites en sorte de**
 
 ```bash
-[gwuill@web ~]$ sudo firewall-cmd --zone=public --add-source=10.105.1.13 --permanent
+[gwuill@web ~]$ sudo firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="10.105.1.1" port port="22" protocol="tcp" accept'
+[gwuill@web ~]$ sudo firewall-cmd --permanent --zone=public --add-rich-rule='rule family="ipv4" source address="10.105.1.13" port port="80" protocol="tcp" accept'
+[gwuill@web ~]$ sudo firewall-cmd --remove-port=80/tcp --permanent
 success
-[gwuill@web ~]$ sudo firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" source address="10.105.1.13" accept'
- --permanent
-success
-[gwuill@web ~]$ sudo sudo firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" source address="0.0.0.0/0" drop' --permanent
-success
-[gwuill@web ~]$ sudo firewall-cmd --reload
+[gwuill@web ~]$ sudo firewall-cmd --remove-service=ssh --permanent
 success
 ```
 
