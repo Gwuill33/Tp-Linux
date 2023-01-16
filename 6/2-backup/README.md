@@ -49,10 +49,10 @@ $ sudo systemctl start backup
 /srv/backup/        10.105.1.11(rw,sync,no_root_squash,no_subtree_check)
 ```
 ```bash
-[gwuill@storage ~]$ sudo firewall-cmd --add-port=4096/tcp --permanent
-success
+[gwuill@storage ~]$ sudo firewall-cmd --permanent --add-service=nfs
+[gwuill@storage ~]$ sudo firewall-cmd --permanent --add-service=mountd
+[gwuill@storage ~]$ sudo firewall-cmd --permanent --add-service=rpc-bind
 [gwuill@storage ~]$ sudo firewall-cmd --reload
-success
 ```
 ```bash
 [gwuill@storage ~]$ sudo systemctl start nfs-utils
