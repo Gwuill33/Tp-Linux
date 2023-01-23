@@ -8,12 +8,48 @@ C'est must-have sur n'importe quel serveur à peu de choses près. En plus d'enr
 
 🌞 Faites en sorte que :
 
-- si quelqu'un se plante 3 fois de password pour une co SSH en moins de 1 minute, il est ban
-- vérifiez que ça fonctionne en vous faisant ban
-- utilisez une commande dédiée pour lister les IPs qui sont actuellement ban
-- afficher l'état du firewal, et trouver la ligne qui ban l'IP en question
-- lever le ban avec une commande liée à fail2ban
+```bash
+[gwuill@proxy-tp6 ~]$ sudo nano /etc/fail2ban/jail.local
+enabled = true
+port    = ssh
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+bantime  = 10m
+findtime  = 1m
+maxretry = 3
 
-> Vous pouvez vous faire ban en effectuant une connexion SSH depuis `web.tp6.linux` vers `db.tp6.linux` par exemple, comme ça vous gardez intacte la connexion de votre PC vers `db.tp6.linux`, et vous pouvez continuer à bosser en SSH.
-
-![Chinese bots](../pics/chinese_bots.webp)
+```
+```bash
+[gwuill@proxy-tp6 ~]$ sudo fail2ban-client status sshd
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed: 0
+|  |- Total failed:     0
+|  `- File list:        /var/log/secure
+`- Actions
+   |- Currently banned: 1
+   |- Total banned:     1
+   `- Banned IP list:
+        `- 10.105.1.11/24
+```
+```bash
+[gwuill@proxy-tp6 ~]$ sudo firewall-cmd --list-all
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: enp0s3 enp0s8
+  sources:
+  services: cockpit dhcpv6-client ssh
+  ports: 443/tcp
+  protocols:
+  forward: yes
+  masquerade: no
+  forward-ports:
+  source-ports:
+  icmp-blocks:
+  rich rules:
+        rule family="ipv4" source address="10.105.1.11/24" reject
+```
+```bash
+[gwuill@proxy-tp6 ~]$ sudo fail2ban-client set sshd unbanip 10.105.1.11
+```
